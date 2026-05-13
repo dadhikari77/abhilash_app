@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+v<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -44,7 +44,7 @@ html,body{height:100%;font-family:'Sora',sans-serif;background:var(--bg);color:v
 .login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--p),var(--pm));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;margin-top:6px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
 .login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,123,85,.35)}
 .login-btn:active{transform:translateY(0)}
-.lerr{background:var(--danl);color:var(--dan);border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px}
+.lerr{background:var(--danl);color:var(--dan);border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:11px;margin-top:8px;display:none}
 .lhint{background:var(--pl);border-radius:10px;padding:11px 14px;margin-top:14px;font-size:11px;color:var(--p2);line-height:1.7}
 .lhint b{font-weight:700}
 
@@ -418,36 +418,39 @@ function setRole(r){
 }
 
 function doLogin(){
-  try{
-    var err=document.getElementById('loginErr');
-    if(err) err.style.cssText='display:none';
-    if(loginRole==='admin'){
-      var u=document.getElementById('aUser').value.trim();
-      var p=document.getElementById('aPass').value.trim();
-      if((u==='admin'||u===ADMIN.u)&&(p==='admin123'||p===ADMIN.p)){
-        role='admin';
-        setTopbar('AD','Admin','Administrator');
-        document.getElementById('sbRoleLabel').textContent='Admin Panel';
-        showApp('dashboard');
-      }else{
-        if(err){err.style.cssText='display:block;background:#fef2f2;color:#d00;border:1px solid #fca;border-radius:8px;padding:10px;font-size:12px;margin-top:8px;';}
-        if(err) err.innerHTML='Wrong credentials &mdash; Username: admin &nbsp;|&nbsp; Password: admin123';
-      }
-    }else{
-      var ph=document.getElementById('mPhone').value.trim();
-      var pw=document.getElementById('mPass').value.trim();
-      var m=MEMBERS.find(function(x){return x.phone===ph;});
-      if(m&&pw===m.pass){
-        role='member';memId=m.id;
-        setTopbar(ini(m.name),m.name.split(' ')[0],'Member');
-        document.getElementById('sbRoleLabel').textContent='Member Portal';
-        showApp('udashboard');
-      }else{
-        if(err){err.style.cssText='display:block;background:#fef2f2;color:#d00;border:1px solid #fca;border-radius:8px;padding:10px;font-size:12px;margin-top:8px;';}
-        if(err) err.innerHTML='Phone number or password is incorrect.';
-      }
+  var u = (document.getElementById('aUser').value || '').trim();
+  var p = (document.getElementById('aPass').value || '').trim();
+  var ph = (document.getElementById('mPhone').value || '').trim();
+  var pw = (document.getElementById('mPass').value || '').trim();
+
+  var errEl = document.getElementById('loginErr');
+
+  if(loginRole === 'admin'){
+    if(u === 'admin' && p === 'admin123'){
+      role = 'admin';
+      setTopbar('AD','Admin','Administrator');
+      document.getElementById('sbRoleLabel').textContent = 'Admin Panel';
+      showApp('dashboard');
+    } else {
+      errEl.style.cssText = 'display:block!important;background:#fef2f2;color:#c00;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;font-weight:600;';
+      errEl.innerHTML = '&#10060; Use username: <b>admin</b> and password: <b>admin123</b>';
     }
-  }catch(ex){alert('Login error: '+ex.message);}
+  } else {
+    var mem = null;
+    for(var i=0; i<MEMBERS.length; i++){
+      if(MEMBERS[i].phone === ph){ mem = MEMBERS[i]; break; }
+    }
+    if(mem && pw === mem.pass){
+      role = 'member';
+      memId = mem.id;
+      setTopbar(ini(mem.name), mem.name.split(' ')[0], 'Member');
+      document.getElementById('sbRoleLabel').textContent = 'Member Portal';
+      showApp('udashboard');
+    } else {
+      errEl.style.cssText = 'display:block!important;background:#fef2f2;color:#c00;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;font-weight:600;';
+      errEl.innerHTML = '&#10060; Phone number or password incorrect.';
+    }
+  }
 }
 
 function setTopbar(ava,name,sub){
