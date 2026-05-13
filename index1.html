@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SavingsCircle — Group Fund Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#0f7b55;--p2:#0a5c3f;--p3:#14a872;--pl:#e6f7f1;--pm:#1a9e6b;
+  --acc:#f59e0b;--accl:#fef3c7;--acc2:#d97706;
+  --dan:#ef4444;--danl:#fef2f2;
+  --inf:#3b82f6;--infl:#eff6ff;
+  --pur:#8b5cf6;--purl:#f5f3ff;
+  --bg:#f0f4f2;--bg2:#e8ede9;--sur:#ffffff;
+  --bdr:#d4ddd7;--bdr2:#c0cec4;
+  --tx:#0f1f18;--tx2:#3d5248;--mu:#6b8278;--hi:#9fb5a8;
+  --rad:12px;--rad2:16px;--rad3:20px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+  --shadow2:0 4px 16px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
+}
+html,body{height:100%;font-family:'Sora',sans-serif;background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5;overflow:hidden}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ── LOGIN ── */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0a5c3f 0%,#0f7b55 40%,#14a872 100%);display:flex;align-items:center;justify-content:center;z-index:200;transition:opacity .4s,transform .4s}
+.login-screen.out{opacity:0;pointer-events:none;transform:scale(.97)}
+.login-card{background:#fff;border-radius:24px;padding:36px 32px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2),0 4px 16px rgba(0,0,0,.1)}
+.login-brand{text-align:center;margin-bottom:28px}
+.login-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--p),var(--p3));border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 6px 20px rgba(15,123,85,.35)}
+.login-icon i{font-size:26px;color:#fff}
+.login-title{font-size:22px;font-weight:700;color:var(--tx)}
+.login-sub{font-size:12px;color:var(--mu);margin-top:3px}
+.role-tabs{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:20px;gap:3px}
+.role-tab{flex:1;padding:9px;text-align:center;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mu);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.role-tab.active{background:#fff;color:var(--p);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.lfield{margin-bottom:14px}
+.lfield label{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block}
+.lfield input{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-family:'Sora',sans-serif;color:var(--tx);background:#fff;outline:none;transition:all .2s}
+.lfield input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(15,123,85,.12)}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--p),var(--pm));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;margin-top:6px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,123,85,.35)}
+.login-btn:active{transform:translateY(0)}
+.lerr{background:var(--danl);color:var(--dan);border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:11px;margin-top:8px;display:none;align-items:center;gap:6px}
+.lhint{background:var(--pl);border-radius:10px;padding:11px 14px;margin-top:14px;font-size:11px;color:var(--p2);line-height:1.7}
+.lhint b{font-weight:700}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:210px;background:linear-gradient(180deg,#0a5c3f 0%,#0c6b48 60%,#0f7b55 100%);display:flex;flex-direction:column;flex-shrink:0;position:relative;overflow:hidden}
+.sidebar::before{content:'';position:absolute;top:-60px;right:-60px;width:160px;height:160px;background:rgba(255,255,255,.04);border-radius:50%}
+.sidebar::after{content:'';position:absolute;bottom:-40px;left:-40px;width:120px;height:120px;background:rgba(255,255,255,.03);border-radius:50%}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);position:relative;z-index:1}
+.sb-logo{display:flex;align-items:center;gap:9px;margin-bottom:2px}
+.sb-logo-icon{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.sb-logo-icon i{font-size:15px;color:#fff}
+.sb-brand-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.sb-brand-role{font-size:10px;color:rgba(255,255,255,.5);margin-left:39px}
+.nav{padding:8px 8px;flex:1;position:relative;z-index:1;overflow-y:auto}
+.nav-section{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;padding:10px 8px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;color:rgba(255,255,255,.6);cursor:pointer;transition:all .18s;font-size:12px;font-weight:500;margin-bottom:1px;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--acc);border-radius:2px}
+.nav-item i{font-size:15px;width:18px;text-align:center}
+.nav-badge{background:var(--dan);color:#fff;border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:auto}
+.sb-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.08);position:relative;z-index:1}
+.sb-user{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:9px;cursor:pointer;transition:all .18s}
+.sb-user:hover{background:rgba(255,255,255,.08)}
+.ava{display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 0 var(--bdr)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.page-title{font-size:15px;font-weight:700;color:var(--tx)}
+.breadcrumb{font-size:11px;color:var(--mu)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.tb-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--bdr);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mu);transition:all .15s;position:relative}
+.tb-btn:hover{background:var(--bg);color:var(--tx)}
+.notif-dot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--dan);border:1.5px solid #fff}
+.content{flex:1;overflow-y:auto;padding:16px 20px;scroll-behavior:smooth}
+
+/* ── CARDS & STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:var(--rad2);padding:14px 16px;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:all .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.stat-card.green::after{background:linear-gradient(90deg,var(--p),var(--p3))}
+.stat-card.amber::after{background:linear-gradient(90deg,var(--acc),#fbbf24)}
+.stat-card.red::after{background:linear-gradient(90deg,var(--dan),#f87171)}
+.stat-card.blue::after{background:linear-gradient(90deg,var(--inf),#60a5fa)}
+.stat-card.purple::after{background:linear-gradient(90deg,var(--pur),#a78bfa)}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:17px}
+.stat-icon.green{background:var(--pl);color:var(--p)}
+.stat-icon.amber{background:var(--accl);color:var(--acc2)}
+.stat-icon.red{background:var(--danl);color:var(--dan)}
+.stat-icon.blue{background:var(--infl);color:var(--inf)}
+.stat-icon.purple{background:var(--purl);color:var(--pur)}
+.stat-label{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:700;color:var(--tx);line-height:1;font-family:'JetBrains Mono',monospace}
+.stat-sub{font-size:10px;color:var(--mu);margin-top:4px}
+.stat-trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:5px}
+.stat-trend.up{background:#dcfce7;color:#16a34a}
+.stat-trend.dn{background:var(--danl);color:var(--dan)}
+
+.card{background:#fff;border-radius:var(--rad2);border:1px solid var(--bdr);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.card-header{padding:13px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;background:#fff}
+.card-title{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:7px}
+.card-title i{font-size:15px;color:var(--p)}
+.card-body{padding:16px}
+.card-body.np{padding:0}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--bdr)}
+td{padding:10px 12px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fbf9}
+
+/* ── CHIPS ── */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.chip::before{content:'';width:5px;height:5px;border-radius:50%}
+.chip.paid{background:#dcfce7;color:#15803d}.chip.paid::before{background:#16a34a}
+.chip.pending{background:#fef9c3;color:#a16207}.chip.pending::before{background:#ca8a04}
+.chip.overdue{background:var(--danl);color:var(--dan)}.chip.overdue::before{background:var(--dan)}
+.chip.active{background:#dbeafe;color:#1d4ed8}.chip.active::before{background:#3b82f6}
+.chip.closed{background:#f3f4f6;color:#6b7280}.chip.closed::before{background:#9ca3af}
+.chip.rejected{background:#fce7f3;color:#be185d}.chip.rejected::before{background:#ec4899}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .18s;font-family:'Sora',sans-serif;white-space:nowrap}
+.btn-primary{background:var(--p);color:#fff}.btn-primary:hover{background:var(--p2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,123,85,.3)}
+.btn-sm{padding:5px 11px;font-size:11px;border-radius:7px}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:6px}
+.btn-outline{background:transparent;border:1px solid var(--bdr);color:var(--tx2)}.btn-outline:hover{background:var(--bg);border-color:var(--bdr2)}
+.btn-success{background:var(--pl);color:var(--p);border:1px solid #a7f3d0}.btn-success:hover{background:#d1fae5}
+.btn-danger{background:var(--danl);color:var(--dan);border:1px solid #fecaca}.btn-danger:hover{background:#fee2e2}
+.btn-amber{background:var(--accl);color:var(--acc2);border:1px solid #fde68a}.btn-amber:hover{background:#fde68a}
+.btn-ghost{background:transparent;color:var(--mu);border:none}.btn-ghost:hover{color:var(--tx);background:var(--bg)}
+
+/* ── PROGRESS ── */
+.pb{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .5s ease;background:linear-gradient(90deg,var(--p),var(--p3))}
+.pf.amb{background:linear-gradient(90deg,var(--acc),#fbbf24)}
+.pf.red{background:linear-gradient(90deg,var(--dan),#f87171)}
+.pf.blue{background:linear-gradient(90deg,var(--inf),#60a5fa)}
+
+/* ── FORM ── */
+.fg{margin-bottom:12px}
+.fg label{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block}
+input[type=text],input[type=password],input[type=number],input[type=date],select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-size:12px;font-family:'Sora',sans-serif;color:var(--tx);background:#fff;outline:none;transition:all .18s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(15,123,85,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.alert{padding:9px 12px;border-radius:9px;font-size:11px;display:flex;align-items:center;gap:8px;margin-bottom:10px;font-weight:500}
+.alert-s{background:var(--pl);color:var(--p2);border:1px solid #a7f3d0}
+.alert-w{background:var(--accl);color:#92400e;border:1px solid #fde68a}
+.alert-d{background:var(--danl);color:var(--dan);border:1px solid #fecaca}
+.alert-b{background:var(--infl);color:#1e40af;border:1px solid #bfdbfe}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.info-row:last-child{border:none}
+.info-row .lbl{color:var(--mu);font-weight:500}
+.info-row .val{font-weight:600;color:var(--tx)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:60px;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+.modal{background:#fff;border-radius:20px;padding:22px;width:380px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:slideUp .25s ease}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--tx);display:flex;align-items:center;gap:8px}
+.modal h3 i{font-size:17px;color:var(--p)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MONTH GRID ── */
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px}
+.month-btn{padding:8px 4px;border:1.5px solid var(--bdr);border-radius:8px;font-size:11px;font-weight:600;text-align:center;cursor:pointer;transition:all .15s;background:#fff;color:var(--tx2)}
+.month-btn.paid{background:var(--pl);border-color:#a7f3d0;color:var(--p)}
+.month-btn.selected{background:var(--p);color:#fff;border-color:var(--p);transform:scale(1.04)}
+.month-btn.future{opacity:.3;cursor:not-allowed;background:var(--bg)}
+.month-btn:hover:not(.paid):not(.future){border-color:var(--p);background:var(--pl)}
+
+/* ── MEMBER ROW ── */
+.mem-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.mem-row:last-child{border:none}
+
+/* ── TIMELINE ── */
+.tl{padding:4px 0}
+.tl-item{display:flex;gap:10px;padding:7px 0;position:relative}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:5px;top:20px;bottom:-7px;width:1px;background:var(--bdr)}
+.tl-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:3px;border:2px solid #fff;box-shadow:0 0 0 1px var(--bdr)}
+.tl-text{font-size:12px;font-weight:500;color:var(--tx2)}
+.tl-time{font-size:10px;color:var(--hi)}
+
+/* ── LOAN CARD ── */
+.loan-card{background:#fff;border:1px solid var(--bdr);border-radius:var(--rad2);padding:14px;margin-bottom:10px;transition:all .2s}
+.loan-card:hover{box-shadow:var(--shadow2);transform:translateY(-1px)}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:48px 20px}
+.empty-icon{width:64px;height:64px;border-radius:20px;background:var(--bg2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;color:var(--hi)}
+.empty-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:5px}
+.empty-sub{font-size:12px;color:var(--mu);margin-bottom:16px}
+
+/* ── MINI CHART ── */
+.sparkline{display:flex;align-items:flex-end;gap:2px;height:36px}
+.spark-bar{border-radius:2px 2px 0 0;flex:1;min-height:2px;transition:all .3s;background:var(--pl)}
+.spark-bar.lit{background:linear-gradient(180deg,var(--p3),var(--p))}
+
+/* ── DONUT CHART ── */
+.donut-wrap{position:relative;width:100px;height:100px;margin:0 auto}
+.donut-wrap canvas{display:block}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--tx)}
+.donut-lbl{font-size:9px;color:var(--mu);font-weight:600}
+
+/* ── DASHBOARD HERO ── */
+.hero-band{background:linear-gradient(135deg,#0a5c3f,#0f7b55 50%,#14a872);border-radius:var(--rad2);padding:20px 22px;margin-bottom:16px;color:#fff;position:relative;overflow:hidden}
+.hero-band::before{content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;background:rgba(255,255,255,.06);border-radius:50%}
+.hero-band::after{content:'';position:absolute;bottom:-20px;left:40%;width:100px;height:100px;background:rgba(255,255,255,.04);border-radius:50%}
+.hero-title{font-size:11px;font-weight:600;opacity:.7;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;position:relative;z-index:1}
+.hero-val{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;position:relative;z-index:1}
+.hero-sub{font-size:11px;opacity:.7;margin-top:4px;position:relative;z-index:1}
+.hero-chips{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;position:relative;z-index:1}
+.hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;backdrop-filter:blur(4px)}
+
+/* ── SECTION TABS ── */
+.sec-tabs{display:flex;gap:2px;border-bottom:1px solid var(--bdr);margin-bottom:14px}
+.sec-tab{padding:8px 14px;font-size:12px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.sec-tab.active{color:var(--p);border-bottom-color:var(--p)}
+.sec-tab:hover:not(.active){color:var(--tx)}
+
+/* ── ACTIVITY BADGE ── */
+.activity-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.activity-row:last-child{border:none}
+.activity-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+
+/* ── SETTINGS ── */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.setting-row:last-child{border:none}
+.setting-info h4{font-size:12px;font-weight:600;color:var(--tx);margin-bottom:2px}
+.setting-info p{font-size:11px;color:var(--mu)}
+.danger-zone{border:1px solid #fecaca;border-radius:var(--rad2);padding:14px;margin-top:14px}
+.danger-zone-title{font-size:11px;font-weight:700;color:var(--dan);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--mu)}
+
+/* ── ANIMATIONS ── */
+@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:countUp .3s ease forwards}
+
+/* ── MEMBER GRID ── */
+.member-card{background:#fff;border:1px solid var(--bdr);border-radius:var(--rad2);padding:14px;transition:all .2s;cursor:pointer}
+.member-card:hover{transform:translateY(-2px);box-shadow:var(--shadow2);border-color:var(--p)}
+
+/* ── SWITCH ── */
+.switch{position:relative;width:38px;height:21px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.switch-track{position:absolute;inset:0;background:var(--bdr2);border-radius:21px;cursor:pointer;transition:all .25s}
+.switch input:checked + .switch-track{background:var(--p)}
+.switch-track::before{content:'';position:absolute;height:15px;width:15px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:all .25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked + .switch-track::before{transform:translateX(17px)}
+
+/* ── SEARCH ── */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--bdr);border-radius:9px;padding:7px 11px;transition:all .18s}
+.search-bar:focus-within{background:#fff;border-color:var(--p);box-shadow:0 0 0 3px rgba(15,123,85,.1)}
+.search-bar i{color:var(--mu);font-size:14px;flex-shrink:0}
+.search-bar input{border:none;background:transparent;outline:none;font-size:12px;font-family:'Sora',sans-serif;color:var(--tx);width:100%}
+
+/* ── LOAN PROGRESS RING ── */
+.ring-wrap{position:relative;width:70px;height:70px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--tx)}
+.ring-lbl{font-size:8px;color:var(--mu);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-icon"><i class="ti ti-coin"></i></div>
+      <div class="login-title">SavingsCircle</div>
+      <div class="login-sub">Group Fund Management System</div>
+    </div>
+    <div class="role-tabs">
+      <div class="role-tab active" id="tabAdmin" onclick="setRole('admin')"><i class="ti ti-shield-check"></i>Admin</div>
+      <div class="role-tab" id="tabMember" onclick="setRole('member')"><i class="ti ti-user"></i>Member</div>
+    </div>
+    <div id="adminFields">
+      <div class="lfield"><label>Username</label><input type="text" id="aUser" placeholder="admin" autocomplete="off"></div>
+      <div class="lfield"><label>Password</label><input type="password" id="aPass" placeholder="admin123" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    </div>
+    <div id="memberFields" style="display:none">
+      <div class="lfield"><label>Phone Number</label><input type="text" id="mPhone" placeholder="10-digit phone number" autocomplete="off"></div>
+      <div class="lfield"><label>Password</label><input type="password" id="mPass" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    </div>
+    <div class="lerr" id="loginErr"><i class="ti ti-alert-circle"></i>Invalid credentials. Please try again.</div>
+    <button class="login-btn" onclick="doLogin()"><i class="ti ti-login"></i>Sign In</button>
+    <div class="lhint"><b>Admin:</b> admin / admin123&nbsp;&nbsp;|&nbsp;&nbsp;<b>Members:</b> phone + password set by admin</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appWrap" style="display:none">
+  <div class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo"><div class="sb-logo-icon"><i class="ti ti-coin"></i></div><span class="sb-brand-name">SavingsCircle</span></div>
+      <div class="sb-brand-role" id="sbRoleLabel">Admin Panel</div>
+    </div>
+    <nav class="nav" id="navMenu"></nav>
+    <div class="sb-footer">
+      <div class="sb-user" onclick="doLogout()">
+        <div class="ava" id="sbAva" style="width:28px;height:28px;font-size:10px;background:rgba(255,255,255,.2);color:#fff"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sbName">Admin</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.45)">Click to logout</div>
+        </div>
+        <i class="ti ti-logout" style="color:rgba(255,255,255,.4);font-size:14px"></i>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div class="breadcrumb" id="breadcrumb">Home</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar" style="width:180px"><i class="ti ti-search"></i><input type="text" placeholder="Search members..." id="globalSearch" oninput="handleSearch(this.value)"></div>
+        <div class="tb-btn" id="notifBtn" onclick="showNotifications()"><i class="ti ti-bell"></i><div class="notif-dot" id="notifDot"></div></div>
+        <div class="ava" id="topAva" style="background:var(--pl);color:var(--p);width:30px;height:30px;font-size:11px;cursor:pointer" onclick="currentRole==='member'?goto('uprofile'):goto('settings')"></div>
+        <div style="font-size:11px;color:var(--mu)" id="topName">Admin</div>
+      </div>
+    </div>
+    <div class="content" id="contentArea"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script>
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TODAY=new Date();
+const CUR_MON=TODAY.getMonth()+1;
+const CUR_YR=TODAY.getFullYear();
+const ADMIN={u:'admin',p:'admin123'};
+const COLORS=[
+  {c:'#0f7b55',bg:'#e6f7f1'},{c:'#3b82f6',bg:'#eff6ff'},{c:'#f59e0b',bg:'#fef3c7'},
+  {c:'#8b5cf6',bg:'#f5f3ff'},{c:'#ef4444',bg:'#fef2f2'},{c:'#14b8a6',bg:'#f0fdfa'},
+  {c:'#ec4899',bg:'#fdf2f8'},{c:'#f97316',bg:'#fff7ed'},{c:'#10b981',bg:'#ecfdf5'},
+  {c:'#6366f1',bg:'#eef2ff'}
+];
+
+function ld(){
+  try{
+    return{
+      members:JSON.parse(localStorage.getItem('sc3_m')||'[]'),
+      loans:JSON.parse(localStorage.getItem('sc3_l')||'[]'),
+      activity:JSON.parse(localStorage.getItem('sc3_act')||'[]'),
+      settings:JSON.parse(localStorage.getItem('sc3_s')||JSON.stringify({
+        groupName:'SavingsCircle',contribution:500,totalMonths:12,
+        startMonth:1,startYear:CUR_YR,interestRate:0.5
+      }))
+    };
+  }catch(e){return{members:[],loans:[],activity:[],settings:{groupName:'SavingsCircle',contribution:500,totalMonths:12,startMonth:1,startYear:CUR_YR,interestRate:0.5}};}
+}
+function sv(){
+  localStorage.setItem('sc3_m',JSON.stringify(MEMBERS));
+  localStorage.setItem('sc3_l',JSON.stringify(LOANS));
+  localStorage.setItem('sc3_act',JSON.stringify(ACTIVITY.slice(0,50)));
+  localStorage.setItem('sc3_s',JSON.stringify(SETTINGS));
+}
+function logActivity(icon,text,type){
+  ACTIVITY.unshift({icon,text,type,time:new Date().toISOString()});
+  if(ACTIVITY.length>50)ACTIVITY.pop();
+}
+
+let {members:MEMBERS,loans:LOANS,activity:ACTIVITY,settings:SETTINGS}=ld();
+let role='',memId=0,page='';
+
+function ini(n){return(n||'').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();}
+function fmtM(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN');}
+function getMem(id){return MEMBERS.find(m=>m.id===id);}
+function getColor(i){return COLORS[i%COLORS.length];}
+function calcEMI(p,n){const r=SETTINGS.interestRate/100;return n>0?p*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):p;}
+function calcTotalInt(amt,months){return amt*(SETTINGS.interestRate/100)*months;}
+function totalCollected(){return MEMBERS.reduce((t,m)=>t+(m.paid||[]).length*SETTINGS.contribution,0);}
+function totalLoaned(){return LOANS.filter(l=>l.approved).reduce((s,l)=>s+l.amount,0);}
+function timeAgo(iso){
+  const diff=(Date.now()-new Date(iso))/1000;
+  if(diff<60)return'just now';
+  if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+
+let loginRole='admin';
+function setRole(r){
+  loginRole=r;
+  ['admin','member'].forEach(x=>document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).className='role-tab'+(x===r?' active':''));
+  document.getElementById('adminFields').style.display=r==='admin'?'block':'none';
+  document.getElementById('memberFields').style.display=r==='member'?'block':'none';
+  document.getElementById('loginErr').style.display='none';
+}
+
+function doLogin(){
+  const err=document.getElementById('loginErr');err.style.display='none';
+  if(loginRole==='admin'){
+    const u=document.getElementById('aUser').value.trim();
+    const p=document.getElementById('aPass').value.trim();
+    if(u===ADMIN.u&&p===ADMIN.p){
+      role='admin';showApp('dashboard');
+      document.getElementById('sbRoleLabel').textContent='Admin Panel';
+      setTopbar('AD','Admin','Administrator');
+    }else{
+      err.style.display='flex';
+      err.innerHTML='<i class="ti ti-alert-circle"></i>Invalid credentials. Try: admin / admin123';
+    }
+  }else{
+    const ph=document.getElementById('mPhone').value.trim();
+    const pw=document.getElementById('mPass').value.trim();
+    const m=MEMBERS.find(x=>x.phone===ph);
+    if(m&&pw===m.pass){
+      role='member';memId=m.id;showApp('udashboard');
+      document.getElementById('sbRoleLabel').textContent='Member Portal';
+      setTopbar(ini(m.name),m.name.split(' ')[0],'Member');
+    }else{
+      err.style.display='flex';
+      err.innerHTML='<i class="ti ti-alert-circle"></i>Phone or password incorrect.';
+    }
+  }
+}
+
+function setTopbar(ava,name,sub){
+  document.getElementById('sbAva').textContent=ava;
+  document.getElementById('topAva').textContent=ava;
+  document.getElementById('sbName').textContent=name;
+  document.getElementById('topName').textContent=name;
+}
+
+function showApp(p){
+  document.getElementById('loginScreen').classList.add('out');
+  setTimeout(()=>{document.getElementById('loginScreen').style.display='none';},400);
+  document.getElementById('appWrap').style.display='flex';
+  buildNav();goto(p);
+  updateNotifDot();
+}
+
+function doLogout(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginScreen').classList.remove('out');
+  document.getElementById('appWrap').style.display='none';
+  document.getElementById('aPass').value='';
+  document.getElementById('mPhone').value='';
+  document.getElementById('mPass').value='';
+}
+
+const ADMIN_NAV=[
+  {section:'Main'},
+  {id:'dashboard',icon:'ti-layout-dashboard',label:'Dashboard'},
+  {id:'members',icon:'ti-users',label:'Members'},
+  {section:'Finance'},
+  {id:'collections',icon:'ti-coins',label:'Collections'},
+  {id:'loans',icon:'ti-credit-card',label:'Loans'},
+  {id:'savings',icon:'ti-piggy-bank',label:'Savings Pool'},
+  {section:'More'},
+  {id:'activity',icon:'ti-activity',label:'Activity Log'},
+  {id:'settings',icon:'ti-settings',label:'Settings'},
+];
+const MEMBER_NAV=[
+  {section:'My Account'},
+  {id:'udashboard',icon:'ti-layout-dashboard',label:'Dashboard'},
+  {id:'upayments',icon:'ti-coins',label:'My Payments'},
+  {id:'uloan',icon:'ti-credit-card',label:'My Loan'},
+  {id:'ustatement',icon:'ti-file-text',label:'Statement'},
+  {id:'uprofile',icon:'ti-user',label:'My Profile'},
+];
+
+function buildNav(){
+  const items=role==='admin'?ADMIN_NAV:MEMBER_NAV;
+  const pendingLoans=LOANS.filter(l=>l.status==='pending').length;
+  const pendingPay=MEMBERS.filter(m=>!(m.paid||[]).includes(CUR_MON)).length;
+  document.getElementById('navMenu').innerHTML=items.map(i=>{
+    if(i.section)return`<div class="nav-section">${i.section}</div>`;
+    const badge=i.id==='loans'&&pendingLoans?`<span class="nav-badge">${pendingLoans}</span>`:
+                i.id==='collections'&&pendingPay?`<span class="nav-badge">${pendingPay}</span>`:'';
+    return`<div class="nav-item${page===i.id?' active':''}" onclick="goto('${i.id}')"><i class="ti ${i.icon}"></i>${i.label}${badge}</div>`;
+  }).join('');
+}
+
+function goto(p){
+  page=p;buildNav();
+  const T={dashboard:'Dashboard',members:'Members',collections:'Collections',loans:'Loans',savings:'Savings Pool',activity:'Activity Log',settings:'Settings',udashboard:'My Dashboard',upayments:'My Payments',uloan:'My Loan',ustatement:'Statement',uprofile:'Profile'};
+  document.getElementById('pageTitle').textContent=T[p]||p;
+  document.getElementById('breadcrumb').textContent='Home › '+(T[p]||p);
+  const F={dashboard:rAdminDash,members:rMembers,collections:rCollections,loans:rLoans,savings:rSavings,activity:rActivity,settings:rSettings,udashboard:rUserDash,upayments:rUserPayments,uloan:rUserLoan,ustatement:rUserStatement,uprofile:rUserProfile};
+  document.getElementById('contentArea').innerHTML=(F[p]||(() =>'<div class="empty-state"><div class="empty-icon"><i class="ti ti-tool"></i></div><div class="empty-title">Coming Soon</div></div>'))();
+  if(p==='collections'){setTimeout(()=>{if(document.getElementById('bd_mem'))refreshBD();},80);}
+  document.getElementById('contentArea').scrollTop=0;
+}
+
+function updateNotifDot(){
+  const hasNotif=LOANS.filter(l=>l.status==='pending').length>0||MEMBERS.filter(m=>!(m.paid||[]).includes(CUR_MON)).length>0;
+  document.getElementById('notifDot').style.display=hasNotif?'block':'none';
+}
+
+function handleSearch(val){
+  if(val.trim().length<2)return;
+  const m=MEMBERS.find(x=>x.name.toLowerCase().includes(val.toLowerCase())||x.phone.includes(val));
+  if(m&&role==='admin'){goto('members');}
+}
+
+// ─── ADMIN DASHBOARD ───
+function rAdminDash(){
+  if(!MEMBERS.length)return`<div class="empty-state"><div class="empty-icon"><i class="ti ti-users"></i></div><div class="empty-title">Welcome to SavingsCircle!</div><div class="empty-sub">Start by adding your group members</div><button class="btn btn-primary" onclick="goto('members')"><i class="ti ti-plus"></i>Add First Member</button></div>`;
+  const tc=totalCollected(),tl=totalLoaned(),pool=tc-tl;
+  const intEarned=LOANS.filter(l=>l.approved).reduce((s,l)=>s+calcTotalInt(l.amount,l.paid),0);
+  const pendingThis=MEMBERS.filter(m=>!(m.paid||[]).includes(CUR_MON)).length;
+  const collectedThis=MEMBERS.filter(m=>(m.paid||[]).includes(CUR_MON)).length;
+  const pctThis=MEMBERS.length?Math.round((collectedThis/MEMBERS.length)*100):0;
+  const bars=MONTHS.map((_,i)=>MEMBERS.filter(m=>(m.paid||[]).includes(i+1)).length);
+  return`
+  <div class="hero-band">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="hero-title">Total Fund Pool</div>
+        <div class="hero-val">${fmtM(pool+intEarned)}</div>
+        <div class="hero-sub">${fmtM(tc)} collected · ${fmtM(tl)} loaned · ${fmtM(intEarned)} interest</div>
+      </div>
+      <div style="text-align:right">
+        <div class="hero-title">${MONTHS[CUR_MON-1]} Collection</div>
+        <div style="font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace">${pctThis}%</div>
+        <div class="hero-sub">${collectedThis}/${MEMBERS.length} paid</div>
+      </div>
+    </div>
+    <div class="hero-chips">
+      <div class="hero-chip"><i class="ti ti-users"></i> ${MEMBERS.length} Members</div>
+      <div class="hero-chip"><i class="ti ti-credit-card"></i> ${LOANS.filter(l=>l.status==='active').length} Active Loans</div>
+      <div class="hero-chip"><i class="ti ti-calendar"></i> Month ${CUR_MON}/${SETTINGS.totalMonths}</div>
+      ${pendingThis?`<div class="hero-chip" style="background:rgba(239,68,68,.25);border-color:rgba(239,68,68,.4)"><i class="ti ti-alert-triangle"></i> ${pendingThis} Pending</div>`:'<div class="hero-chip" style="background:rgba(255,255,255,.25)"><i class="ti ti-check"></i> All Paid!</div>'}
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card green animate-in" style="animation-delay:.05s">
+      <div class="stat-icon green"><i class="ti ti-coins"></i></div>
+      <div class="stat-label">Total Collected</div>
+      <div class="stat-val">${fmtM(tc)}</div>
+      <div class="stat-sub">${MEMBERS.reduce((t,m)=>(m.paid||[]).length>t?(m.paid||[]).length:t,0)} months max</div>
+    </div>
+    <div class="stat-card blue animate-in" style="animation-delay:.1s">
+      <div class="stat-icon blue"><i class="ti ti-wallet"></i></div>
+      <div class="stat-label">Available Pool</div>
+      <div class="stat-val">${fmtM(pool)}</div>
+      <div class="stat-sub">Ready to loan</div>
+    </div>
+    <div class="stat-card amber animate-in" style="animation-delay:.15s">
+      <div class="stat-icon amber"><i class="ti ti-trending-up"></i></div>
+      <div class="stat-label">Interest Earned</div>
+      <div class="stat-val">${fmtM(intEarned)}</div>
+      <div class="stat-sub">${SETTINGS.interestRate}% monthly</div>
+    </div>
+    <div class="stat-card ${pendingThis?'red':'green'} animate-in" style="animation-delay:.2s">
+      <div class="stat-icon ${pendingThis?'red':'green'}"><i class="ti ti-${pendingThis?'alert-circle':'circle-check'}"></i></div>
+      <div class="stat-label">This Month</div>
+      <div class="stat-val">${pendingThis?pendingThis+' pending':'All paid'}</div>
+      <div class="stat-sub">${pctThis}% collected</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="ti ti-chart-bar"></i>Monthly Collections</span></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:flex-end;gap:5px;height:90px;margin-bottom:8px">
+          ${bars.map((v,i)=>{
+            const isFuture=i+1>CUR_MON,pct=MEMBERS.length?Math.round((v/MEMBERS.length)*100):0;
+            return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px" title="${MONTHS[i]}: ${v} paid">
+              <div style="width:100%;border-radius:4px 4px 0 0;background:${isFuture?'var(--bg2)':i+1===CUR_MON?'linear-gradient(180deg,var(--acc),var(--acc2))':'linear-gradient(180deg,var(--p3),var(--p))'};height:${isFuture?8:Math.max(8,pct*0.7)}px;transition:all .4s ${i*.03}s;cursor:pointer"></div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;gap:3px">
+          ${MONTHS.map((m,i)=>`<div style="flex:1;text-align:center;font-size:9px;color:${i+1===CUR_MON?'var(--p)':'var(--hi)'};font-weight:${i+1===CUR_MON?700:400}">${m.slice(0,1)}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="ti ti-clock"></i>Recent Activity</span><button class="btn btn-ghost btn-xs" onclick="goto('activity')">View All</button></div>
+      <div class="card-body" style="padding:8px 14px">
+        ${ACTIVITY.length?ACTIVITY.slice(0,6).map(a=>`
+          <div class="activity-row">
+            <div class="activity-icon" style="background:${a.type==='payment'?'var(--pl)':a.type==='loan'?'var(--infl)':a.type==='member'?'var(--purl)':'var(--accl)'}">
+              <i class="ti ${a.type==='payment'?'ti-coins':a.type==='loan'?'ti-credit-card':a.type==='member'?'ti-user-plus':'ti-bell'}" style="color:${a.type==='payment'?'var(--p)':a.type==='loan'?'var(--inf)':a.type==='member'?'var(--pur)':'var(--acc)'}"></i>
+            </div>
+            <div style="flex:1;min-width:0"><div class="tl-text" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div><div class="tl-time">${timeAgo(a.time)}</div></div>
+          </div>`).join(''):`<div style="text-align:center;padding:20px;color:var(--mu);font-size:12px">No activity yet</div>`}
+      </div>
+    </div>
+  </div>
+  ${MEMBERS.filter(m=>!(m.paid||[]).includes(CUR_MON)).length?`
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="ti ti-alert-triangle" style="color:var(--dan)"></i>Pending Payments — ${MONTHS[CUR_MON-1]}</span>
+      <button class="btn btn-primary btn-sm" onclick="goto('collections')"><i class="ti ti-coins"></i>Collect All</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table><colgroup><col style="width:35%"><col style="width:20%"><col style="width:18%"><col style="width:15%"><col style="width:12%"></colgroup>
+        <thead><tr><th>Member</th><th>Phone</th><th>Paid Months</th><th>Due Amount</th><th>Action</th></tr></thead>
+        <tbody>${MEMBERS.filter(m=>!(m.paid||[]).includes(CUR_MON)).slice(0,5).map(m=>`
+          <tr><td><div style="display:flex;align-items:center;gap:8px">
+            <div class="ava" style="width:28px;height:28px;font-size:10px;background:${m.bg};color:${m.color}">${ini(m.name)}</div>
+            <div><div style="font-weight:600;font-size:12px">${m.name}</div><div style="font-size:10px;color:var(--mu)">M${String(m.id).padStart(3,'0')}</div></div>
+          </div></td>
+          <td style="color:var(--mu)">${m.phone}</td>
+          <td><span style="font-weight:600">${(m.paid||[]).length}</span><span style="color:var(--mu)">/${SETTINGS.totalMonths}</span></td>
+          <td style="font-weight:700;color:var(--p)">${fmtM(SETTINGS.contribution)}</td>
+          <td><button class="btn btn-success btn-xs" onclick="quickCollect(${m.id},${CUR_MON})"><i class="ti ti-check"></i>Collect</button></td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`:''}
+  ${LOANS.filter(l=>l.status==='active').length?`
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="ti ti-credit-card"></i>Active Loans</span><button class="btn btn-ghost btn-xs" onclick="goto('loans')">View All →</button></div>
+    <div class="card-body" style="padding:0"><table>
+      <colgroup><col style="width:28%"><col style="width:16%"><col style="width:16%"><col style="width:20%"><col style="width:20%"></colgroup>
+      <thead><tr><th>Member</th><th>Amount</th><th>EMI</th><th>Progress</th><th>Outstanding</th></tr></thead>
+      <tbody>${LOANS.filter(l=>l.status==='active').map(l=>{const m=getMem(l.memberId);if(!m)return'';const emi=calcEMI(l.amount,l.months),rem=l.months-l.paid,pct=Math.round((l.paid/l.months)*100);
+        return`<tr><td><div style="display:flex;align-items:center;gap:7px"><div class="ava" style="width:24px;height:24px;font-size:9px;background:${m.bg};color:${m.color}">${ini(m.name)}</div>${m.name}</div></td>
+        <td class="mono">${fmtM(l.amount)}</td><td class="mono">${fmtM(emi)}</td>
+        <td><div style="font-size:10px;color:var(--mu);margin-bottom:2px">${pct}% (${l.paid}/${l.months})</div><div class="pb"><div class="pf amb" style="width:${pct}%"></div></div></td>
+        <td class="mono" style="color:var(--dan);font-weight:600">${fmtM(rem*emi)}</td></tr>`;
+      }).join('')}</tbody>
+    </table></div>
+  </div>`:''}`;
+}
+
+// ─── MEMBERS ───
+function rMembers(){
+  const searchVal=document.getElementById('globalSearch')?.value?.toLowerCase()||'';
+  const filtered=searchVal?MEMBERS.filter(m=>m.name.toLowerCase().includes(searchVal)||m.phone.includes(searchVal)):MEMBERS;
+  return`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div style="font-size:12px;color:var(--mu)">${filtered.length} of ${MEMBERS.length} members</div>
+    <button class="btn btn-primary btn-sm" onclick="showAddMember()"><i class="ti ti-user-plus"></i>Add Member</button>
+  </div>
+  ${!MEMBERS.length?`<div class="empty-state"><div class="empty-icon"><i class="ti ti-users"></i></div><div class="empty-title">No members yet</div><div class="empty-sub">Add your first group member to get started</div><button class="btn btn-primary" onclick="showAddMember()"><i class="ti ti-user-plus"></i>Add First Member</button></div>`:`
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+    ${filtered.map(m=>{
+      const paid=(m.paid||[]).length,pct=Math.round((paid/SETTINGS.totalMonths)*100);
+      const paidThis=(m.paid||[]).includes(CUR_MON);
+      const loan=LOANS.find(l=>l.memberId===m.id&&l.status==='active');
+      return`<div class="member-card" onclick="showMemberDetail(${m.id})">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div class="ava" style="width:38px;height:38px;font-size:13px;background:${m.bg};color:${m.color}">${ini(m.name)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name}</div>
+            <div style="font-size:10px;color:var(--mu)">M${String(m.id).padStart(3,'0')} · ${m.phone}</div>
+          </div>
+          <span class="chip ${paidThis?'paid':'overdue'}">${paidThis?'Paid':'Due'}</span>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-bottom:3px"><span>Contribution</span><span class="mono" style="font-weight:600;color:var(--p)">${fmtM(paid*SETTINGS.contribution)}</span></div>
+          <div class="pb"><div class="pf" style="width:${pct}%"></div></div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px">${paid}/${SETTINGS.totalMonths} months</div>
+        </div>
+        ${loan?`<div style="background:var(--infl);border-radius:7px;padding:5px 8px;font-size:10px;color:var(--inf);font-weight:600"><i class="ti ti-credit-card"></i> Active loan: ${fmtM(loan.amount)}</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`}`;
+}
+
+function showMemberDetail(id){
+  const m=getMem(id);if(!m)return;
+  const loan=LOANS.find(l=>l.memberId===id&&l.status==='active');
+  const paid=(m.paid||[]).length;
+  openModal(`<h3><i class="ti ti-user"></i>${m.name}</h3>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--bg);border-radius:10px">
+      <div class="ava" style="width:44px;height:44px;font-size:16px;background:${m.bg};color:${m.color}">${ini(m.name)}</div>
+      <div><div style="font-weight:700;font-size:14px">${m.name}</div><div style="font-size:11px;color:var(--mu)">M${String(m.id).padStart(3,'0')} · ${m.phone}</div></div>
+    </div>
+    <div class="info-row"><span class="lbl">Total Contributed</span><span class="val mono" style="color:var(--p)">${fmtM(paid*SETTINGS.contribution)}</span></div>
+    <div class="info-row"><span class="lbl">Months Paid</span><span class="val">${paid}/${SETTINGS.totalMonths}</span></div>
+    <div class="info-row"><span class="lbl">This Month</span><span class="val"><span class="chip ${(m.paid||[]).includes(CUR_MON)?'paid':'overdue'}">${(m.paid||[]).includes(CUR_MON)?'Paid':'Pending'}</span></span></div>
+    ${loan?`<div class="info-row"><span class="lbl">Active Loan</span><span class="val mono">${fmtM(loan.amount)}</span></div>`:''}
+    <div style="display:flex;flex-direction:column;gap:7px;margin-top:14px">
+      ${!(m.paid||[]).includes(CUR_MON)?`<button class="btn btn-success" onclick="closeModal();quickCollect(${id},${CUR_MON})"><i class="ti ti-coin"></i>Collect ${MONTHS[CUR_MON-1]} Payment</button>`:''}
+      <button class="btn btn-amber" onclick="closeModal();goto('collections')"><i class="ti ti-history"></i>Backdate Collection</button>
+      <button class="btn btn-outline" onclick="closeModal();showEditMember(${id})"><i class="ti ti-edit"></i>Edit Member</button>
+      <button class="btn btn-danger" onclick="deleteMember(${id})"><i class="ti ti-trash"></i>Remove Member</button>
+    </div>`);
+}
+
+function rCollections(){
+  const paidThis=MEMBERS.filter(m=>(m.paid||[]).includes(CUR_MON)).length;
+  const pct=MEMBERS.length?Math.round((paidThis/MEMBERS.length)*100):0;
+  return`
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card green"><div class="stat-icon green"><i class="ti ti-check"></i></div><div class="stat-label">Collected This Month</div><div class="stat-val">${fmtM(paidThis*SETTINGS.contribution)}</div><div class="stat-sub">${paidThis}/${MEMBERS.length} members · ${pct}%</div></div>
+    <div class="stat-card amber"><div class="stat-icon amber"><i class="ti ti-clock"></i></div><div class="stat-label">Pending This Month</div><div class="stat-val">${fmtM((MEMBERS.length-paidThis)*SETTINGS.contribution)}</div><div class="stat-sub">${MEMBERS.length-paidThis} members</div></div>
+    <div class="stat-card blue"><div class="stat-icon blue"><i class="ti ti-database"></i></div><div class="stat-label">All-Time Total</div><div class="stat-val">${fmtM(totalCollected())}</div><div class="stat-sub">All months combined</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px">
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-coin"></i>Record Payment</span></div>
+        <div class="card-body">
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="fg"><label>Member</label><select id="col_mem">${MEMBERS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')||'<option>No members</option>'}</select></div>
+            <div class="fg"><label>Month</label><select id="col_month">
+              ${MONTHS.map((mo,i)=>{const mn=i+1,isFuture=mn>CUR_MON;return`<option value="${mn}" ${mn===CUR_MON?'selected':''} ${isFuture?'disabled':''} style="${isFuture?'color:#ccc':''}">${mo} ${CUR_YR}${isFuture?' ▸':''}</option>`;}).join('')}
+            </select></div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="fg"><label>Payment Mode</label><select id="col_mode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option></select></div>
+            <div class="fg"><label>Date Received</label><input type="date" id="col_date" value="${TODAY.toISOString().split('T')[0]}"></div>
+          </div>
+          <div class="fg"><label>Reference / Notes</label><input type="text" id="col_note" placeholder="UPI ID, cheque number, etc."></div>
+          <div id="col_status"></div>
+          <button class="btn btn-primary btn-sm" onclick="doCollect()"><i class="ti ti-coin"></i>Record Payment</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-history" style="color:var(--acc)"></i>Backdate Collection</span><span class="chip pending">Previous Months</span></div>
+        <div class="card-body">
+          <div class="alert alert-w"><i class="ti ti-info-circle"></i>Select unpaid months for a member and record all at once</div>
+          <div class="fg"><label>Member</label><select id="bd_mem" onchange="refreshBD()">${MEMBERS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')||'<option>No members</option>'}</select></div>
+          <div class="fg"><label>Select Unpaid Months (click to toggle)</label>
+            <div class="month-grid" id="bd_grid"></div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="fg"><label>Payment Mode</label><select id="bd_mode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option></select></div>
+            <div class="fg"><label>Date Received</label><input type="date" id="bd_date" value="${TODAY.toISOString().split('T')[0]}"></div>
+          </div>
+          <div id="bd_status"></div>
+          <button class="btn btn-amber btn-sm" onclick="doBackdate()"><i class="ti ti-calendar-check"></i>Record Backdate</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-list"></i>Month-wise Summary</span></div>
+        <div class="card-body" style="padding:0"><table>
+          <colgroup><col style="width:28%"><col style="width:16%"><col style="width:16%"><col style="width:24%"><col style="width:16%"></colgroup>
+          <thead><tr><th>Month</th><th>Paid</th><th>Pending</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>${MONTHS.map((mo,i)=>{
+            const mn=i+1,isFuture=mn>CUR_MON;
+            const cnt=MEMBERS.filter(m=>(m.paid||[]).includes(mn)).length;
+            const pc=MEMBERS.length?Math.round((cnt/MEMBERS.length)*100):0;
+            return`<tr style="${isFuture?'color:var(--hi)':''}"><td style="font-weight:${mn===CUR_MON?700:400}">${mo} ${CUR_YR}${mn===CUR_MON?' ●':''}</td>
+            <td>${isFuture?'—':cnt}</td><td>${isFuture?'—':MEMBERS.length-cnt}</td>
+            <td class="mono">${isFuture?'—':fmtM(cnt*SETTINGS.contribution)}</td>
+            <td>${isFuture?'<span class="chip closed">—</span>':cnt===MEMBERS.length&&MEMBERS.length?'<span class="chip paid">Done</span>':cnt===0?'<span class="chip overdue">0%</span>':'<span class="chip pending">'+pc+'%</span>'}</td></tr>`;
+          }).join('')}</tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function refreshBD(){
+  const mid=parseInt(document.getElementById('bd_mem')?.value);
+  const m=getMem(mid);
+  const grid=document.getElementById('bd_grid');
+  if(!grid||!m)return;
+  grid.innerHTML=MONTHS.map((mo,i)=>{
+    const mn=i+1,isFuture=mn>CUR_MON,isPaid=(m.paid||[]).includes(mn);
+    return`<div class="month-btn${isPaid?' paid':isFuture?' future':''}" data-mn="${mn}" ${!isPaid&&!isFuture?'onclick="toggleBD(this)"':''}>${mo}</div>`;
+  }).join('');
+}
+
+function toggleBD(el){el.classList.toggle('selected');}
+
+function doCollect(){
+  const mid=parseInt(document.getElementById('col_mem')?.value);
+  const mn=parseInt(document.getElementById('col_month')?.value);
+  const m=getMem(mid);const st=document.getElementById('col_status');
+  if(!m){st.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Select a member</div>';return;}
+  if((m.paid||[]).includes(mn)){st.innerHTML=`<div class="alert alert-w"><i class="ti ti-alert-triangle"></i>${m.name} already paid for ${MONTHS[mn-1]}</div>`;return;}
+  if(!m.paid)m.paid=[];
+  m.paid.push(mn);m.paid.sort((a,b)=>a-b);
+  logActivity('ti-coins',`${m.name} paid ${MONTHS[mn-1]} — ${fmtM(SETTINGS.contribution)}`,'payment');
+  sv();st.innerHTML=`<div class="alert alert-s" style="margin-bottom:8px"><i class="ti ti-check"></i>Recorded: ${m.name} — ${MONTHS[mn-1]}</div>`;
+  updateNotifDot();buildNav();
+}
+
+function doBackdate(){
+  const mid=parseInt(document.getElementById('bd_mem')?.value);
+  const m=getMem(mid);const st=document.getElementById('bd_status');
+  if(!m){st.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Select a member</div>';return;}
+  const sel=[...document.querySelectorAll('#bd_grid .month-btn.selected')].map(el=>parseInt(el.dataset.mn));
+  if(!sel.length){st.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Select at least one month</div>';return;}
+  if(!m.paid)m.paid=[];
+  sel.forEach(mn=>{if(!m.paid.includes(mn))m.paid.push(mn);});
+  m.paid.sort((a,b)=>a-b);
+  logActivity('ti-history',`Backdate: ${m.name} — ${sel.map(mn=>MONTHS[mn-1]).join(', ')}`,'payment');
+  sv();
+  st.innerHTML=`<div class="alert alert-s" style="margin-bottom:8px"><i class="ti ti-check"></i>Recorded ${sel.length} months for ${m.name}</div>`;
+  setTimeout(()=>refreshBD(),400);
+  updateNotifDot();buildNav();
+}
+
+function rLoans(){
+  const active=LOANS.filter(l=>l.status==='active');
+  const intEarned=LOANS.filter(l=>l.approved).reduce((s,l)=>s+calcTotalInt(l.amount,l.paid),0);
+  const pending=LOANS.filter(l=>l.status==='pending');
+  return`
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card red"><div class="stat-icon red"><i class="ti ti-credit-card"></i></div><div class="stat-label">Total Loaned Out</div><div class="stat-val">${fmtM(active.reduce((s,l)=>s+l.amount,0))}</div><div class="stat-sub">${active.length} active loans</div></div>
+    <div class="stat-card amber"><div class="stat-icon amber"><i class="ti ti-trending-up"></i></div><div class="stat-label">Interest Revenue</div><div class="stat-val">${fmtM(intEarned)}</div><div class="stat-sub">${SETTINGS.interestRate}% per month</div></div>
+    <div class="stat-card ${pending.length?'red':'blue'}"><div class="stat-icon ${pending.length?'red':'blue'}"><i class="ti ti-${pending.length?'bell':'check'}"></i></div><div class="stat-label">Pending Approval</div><div class="stat-val">${pending.length}</div><div class="stat-sub">requests waiting</div></div>
+  </div>
+  ${pending.length?`<div class="alert alert-w"><i class="ti ti-bell"></i>${pending.length} loan request(s) awaiting your approval</div>`:''}
+  ${!LOANS.length?`<div class="empty-state"><div class="empty-icon"><i class="ti ti-credit-card"></i></div><div class="empty-title">No loans yet</div><div class="empty-sub">Issue a loan to a group member</div></div>`:''}
+  ${LOANS.map(l=>{
+    const m=getMem(l.memberId);if(!m)return'';
+    const emi=calcEMI(l.amount,l.months),pct=l.months?Math.round((l.paid/l.months)*100):0;
+    const outstanding=(l.months-l.paid)*emi;
+    return`<div class="loan-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="ava" style="width:36px;height:36px;font-size:13px;background:${m.bg};color:${m.color}">${ini(m.name)}</div>
+          <div><div style="font-weight:700;font-size:13px">${m.name}</div><div style="font-size:10px;color:var(--mu)">Issued: ${l.date} · ${l.months} months</div></div>
+        </div>
+        <span class="chip ${l.status}">${l.status}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
+        <div style="background:var(--bg);border-radius:9px;padding:9px"><div style="font-size:9px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Principal</div><div class="mono" style="font-weight:700;font-size:13px">${fmtM(l.amount)}</div></div>
+        <div style="background:var(--bg);border-radius:9px;padding:9px"><div style="font-size:9px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Monthly EMI</div><div class="mono" style="font-weight:700;font-size:13px">${fmtM(emi)}</div></div>
+        <div style="background:var(--accl);border-radius:9px;padding:9px"><div style="font-size:9px;color:var(--acc2);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Total Interest</div><div class="mono" style="font-weight:700;font-size:13px;color:var(--acc2)">${fmtM(calcTotalInt(l.amount,l.months))}</div></div>
+        <div style="background:${l.status==='active'?'var(--danl)':'var(--bg)'};border-radius:9px;padding:9px"><div style="font-size:9px;color:${l.status==='active'?'var(--dan)':'var(--mu)'};font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Outstanding</div><div class="mono" style="font-weight:700;font-size:13px;color:${l.status==='active'?'var(--dan)':'var(--mu)'}">${l.status==='active'?fmtM(outstanding):'—'}</div></div>
+      </div>
+      ${l.status==='active'?`<div><div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;margin-bottom:4px"><span style="color:var(--mu)">Repayment Progress</span><span style="color:var(--p)">${pct}% (${l.paid}/${l.months} EMIs)</span></div><div class="pb" style="height:8px"><div class="pf amb" style="width:${pct}%"></div></div></div>`:''}
+      ${l.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-success btn-sm" onclick="approveLoan(${l.id})"><i class="ti ti-check"></i>Approve Loan</button><button class="btn btn-danger btn-sm" onclick="rejectLoan(${l.id})"><i class="ti ti-x"></i>Reject</button></div>`:''}
+      ${l.status==='active'?`<div style="margin-top:10px;display:flex;gap:7px"><button class="btn btn-outline btn-xs" onclick="showLoanDetails(${l.id})"><i class="ti ti-list"></i>EMI Schedule</button><button class="btn btn-outline btn-xs" onclick="recordEMI(${l.id})"><i class="ti ti-coin"></i>Record EMI</button></div>`:''}
+    </div>`;
+  }).join('')}
+  <button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="showNewLoan()"><i class="ti ti-plus"></i>Issue New Loan</button>`;
+}
+
+function rSavings(){
+  const tc=totalCollected(),tl=totalLoaned(),pool=tc-tl;
+  const intEarned=LOANS.filter(l=>l.approved).reduce((s,l)=>s+calcTotalInt(l.amount,l.paid),0);
+  const projected=MEMBERS.length*SETTINGS.contribution*SETTINGS.totalMonths;
+  const utilPct=tc?Math.round((tl/tc)*100):0;
+  return`
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-icon green"><i class="ti ti-coins"></i></div><div class="stat-label">Gross Collected</div><div class="stat-val">${fmtM(tc)}</div><div class="stat-sub">From all members</div></div>
+    <div class="stat-card blue"><div class="stat-icon blue"><i class="ti ti-wallet"></i></div><div class="stat-label">Current Pool</div><div class="stat-val">${fmtM(pool)}</div><div class="stat-sub">Available to loan</div></div>
+    <div class="stat-card amber"><div class="stat-icon amber"><i class="ti ti-trending-up"></i></div><div class="stat-label">Interest Earned</div><div class="stat-val">${fmtM(intEarned)}</div><div class="stat-sub">${SETTINGS.interestRate}% monthly rate</div></div>
+    <div class="stat-card purple"><div class="stat-icon purple"><i class="ti ti-target"></i></div><div class="stat-label">Projected Total</div><div class="stat-val">${fmtM(projected)}</div><div class="stat-sub">At 100% collection</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px">
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-chart-pie"></i>Fund Breakdown</span></div>
+        <div class="card-body">
+          <div class="info-row"><span class="lbl">Total Collected</span><span class="val mono">${fmtM(tc)}</span></div>
+          <div class="info-row"><span class="lbl">Loans Disbursed</span><span class="val mono" style="color:var(--dan)">−${fmtM(tl)}</span></div>
+          <div class="info-row"><span class="lbl">Interest Earned</span><span class="val mono" style="color:var(--acc)">+${fmtM(intEarned)}</span></div>
+          <div class="info-row" style="font-weight:700"><span class="lbl">Net Fund</span><span class="val mono" style="color:var(--p);font-size:15px">${fmtM(pool+intEarned)}</span></div>
+          ${tc?`<div style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;margin-bottom:5px"><span style="color:var(--mu)">Pool Utilization</span><span style="color:var(--p)">${utilPct}%</span></div>
+            <div style="height:10px;background:var(--bg2);border-radius:5px;overflow:hidden">
+              <div style="height:100%;border-radius:5px;width:${utilPct}%;background:linear-gradient(90deg,var(--acc),var(--dan));transition:width .6s ease"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-top:4px"><span>Available: ${fmtM(pool)}</span><span>Loaned: ${fmtM(tl)}</span></div>
+          </div>`:''}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-users"></i>Member Contributions</span></div>
+        <div class="card-body" style="padding:8px 14px;max-height:280px;overflow-y:auto">
+          ${!MEMBERS.length?'<div style="text-align:center;color:var(--mu);padding:20px;font-size:12px">No members</div>':MEMBERS.sort((a,b)=>(b.paid||[]).length-(a.paid||[]).length).map((m,i)=>`
+          <div class="mem-row">
+            <div style="font-size:11px;font-weight:700;color:var(--mu);width:18px">${i+1}</div>
+            <div class="ava" style="background:${m.bg};color:${m.color};width:26px;height:26px;font-size:9px">${ini(m.name)}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name}</div>
+              <div class="pb" style="width:80px;margin-top:3px"><div class="pf" style="width:${Math.round(((m.paid||[]).length/SETTINGS.totalMonths)*100)}%"></div></div>
+            </div>
+            <div class="mono" style="font-size:12px;font-weight:700;color:var(--p)">${fmtM((m.paid||[]).length*SETTINGS.contribution)}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-calendar"></i>Month Summary</span></div>
+        <div class="card-body" style="padding:0;max-height:460px;overflow-y:auto"><table>
+          <colgroup><col style="width:32%"><col style="width:22%"><col style="width:22%"><col style="width:24%"></colgroup>
+          <thead><tr><th>Month</th><th>Collected</th><th>Rate</th><th>Amount</th></tr></thead>
+          <tbody>${MONTHS.map((mo,i)=>{
+            const mn=i+1,isFuture=mn>CUR_MON,cnt=MEMBERS.filter(m=>(m.paid||[]).includes(mn)).length;
+            const pc=MEMBERS.length?Math.round((cnt/MEMBERS.length)*100):0;
+            return`<tr style="${isFuture?'color:var(--hi)':mn===CUR_MON?'background:#f8fbf9':''}"><td style="font-weight:${mn===CUR_MON?700:400}">${mo}${mn===CUR_MON?' ●':''}</td>
+            <td>${isFuture?'—':cnt+'/'+(MEMBERS.length||0)}</td>
+            <td>${isFuture?'—':'<div style="display:flex;align-items:center;gap:4px"><div class="pb" style="width:36px"><div class="pf'+(pc<50?' red':pc<100?' amb':'')+'" style="width:'+pc+'%"></div></div><span style="font-size:10px">'+pc+'%</span></div>'}</td>
+            <td class="mono" style="font-weight:600">${isFuture?'—':fmtM(cnt*SETTINGS.contribution)}</td></tr>`;
+          }).join('')}</tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function rActivity(){
+  return`
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="ti ti-activity"></i>Activity Log</span><span style="font-size:11px;color:var(--mu)">${ACTIVITY.length} entries</span></div>
+    <div class="card-body" style="padding:8px 14px">
+      ${!ACTIVITY.length?`<div class="empty-state"><div class="empty-icon"><i class="ti ti-activity"></i></div><div class="empty-title">No activity yet</div><div class="empty-sub">Actions like payments and loans will appear here</div></div>`
+      :ACTIVITY.map(a=>`
+        <div class="activity-row">
+          <div class="activity-icon" style="background:${a.type==='payment'?'var(--pl)':a.type==='loan'?'var(--infl)':a.type==='member'?'var(--purl)':'var(--accl)'}">
+            <i class="ti ${a.icon}" style="color:${a.type==='payment'?'var(--p)':a.type==='loan'?'var(--inf)':a.type==='member'?'var(--pur)':'var(--acc)'}"></i>
+          </div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:500">${a.text}</div><div style="font-size:10px;color:var(--mu)">${new Date(a.time).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div>
+          <div style="font-size:10px;color:var(--hi)">${timeAgo(a.time)}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function rSettings(){
+  return`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-adjustments"></i>Group Configuration</span></div>
+        <div class="card-body">
+          <div class="fg"><label>Group Name</label><input id="s_name" value="${SETTINGS.groupName}"></div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="fg"><label>Monthly Contribution (₹)</label><input type="number" id="s_contrib" value="${SETTINGS.contribution}"></div>
+            <div class="fg"><label>Interest Rate (%/month)</label><input type="number" id="s_rate" value="${SETTINGS.interestRate}" step="0.1"></div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="fg"><label>Total Duration (months)</label><input type="number" id="s_months" value="${SETTINGS.totalMonths}"></div>
+            <div class="fg"><label>Start Year</label><input type="number" id="s_yr" value="${SETTINGS.startYear}"></div>
+          </div>
+          <div class="fg"><label>Start Month</label><select id="s_smon">${MONTHS.map((m,i)=>`<option value="${i+1}" ${i+1===SETTINGS.startMonth?'selected':''}>${m}</option>`).join('')}</select></div>
+          <button class="btn btn-primary btn-sm" onclick="saveSettings()"><i class="ti ti-check"></i>Save Settings</button>
+          <div id="settings_msg" style="margin-top:8px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-lock"></i>Admin Password</span></div>
+        <div class="card-body">
+          <div class="fg"><label>Current Password</label><input type="password" id="ap_old"></div>
+          <div class="fg"><label>New Password</label><input type="password" id="ap_new"></div>
+          <div class="fg"><label>Confirm Password</label><input type="password" id="ap_conf"></div>
+          <button class="btn btn-primary btn-sm" onclick="changeAdminPass()"><i class="ti ti-lock"></i>Update Password</button>
+          <div id="ap_msg" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-info-circle"></i>System Info</span></div>
+        <div class="card-body">
+          <div class="info-row"><span class="lbl">Total Members</span><span class="val">${MEMBERS.length}</span></div>
+          <div class="info-row"><span class="lbl">Total Loans</span><span class="val">${LOANS.length}</span></div>
+          <div class="info-row"><span class="lbl">Activity Records</span><span class="val">${ACTIVITY.length}</span></div>
+          <div class="info-row"><span class="lbl">Total Collected</span><span class="val mono" style="color:var(--p)">${fmtM(totalCollected())}</span></div>
+          <div class="info-row"><span class="lbl">Current Month</span><span class="val">${MONTHS[CUR_MON-1]} ${CUR_YR}</span></div>
+          <div class="info-row"><span class="lbl">Interest Rate</span><span class="val">${SETTINGS.interestRate}%/month</span></div>
+        </div>
+      </div>
+      <div class="card" style="border-color:#fecaca">
+        <div class="card-header" style="background:#fff5f5"><span class="card-title" style="color:var(--dan)"><i class="ti ti-alert-triangle" style="color:var(--dan)"></i>Danger Zone</span></div>
+        <div class="card-body">
+          <div class="setting-row">
+            <div class="setting-info"><h4>Clear payment records</h4><p>Reset all monthly payment history</p></div>
+            <button class="btn btn-danger btn-sm" onclick="clearPayments()">Clear</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><h4>Delete all loans</h4><p>Remove all loan records</p></div>
+            <button class="btn btn-danger btn-sm" onclick="clearLoans()">Clear</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><h4>Reset entire app</h4><p>Delete all data permanently</p></div>
+            <button class="btn btn-danger btn-sm" onclick="resetApp()">Reset All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── MEMBER SCREENS ───
+function rUserDash(){
+  const m=getMem(memId);if(!m)return'';
+  const loan=LOANS.find(l=>l.memberId===m.id&&l.status==='active');
+  const paid=(m.paid||[]).length,paidThis=(m.paid||[]).includes(CUR_MON);
+  const pct=Math.round((paid/SETTINGS.totalMonths)*100);
+  return`
+  <div class="hero-band" style="background:linear-gradient(135deg,${m.color},${m.color}dd,${m.color}99)">
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="ava" style="width:52px;height:52px;font-size:20px;background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.3)">${ini(m.name)}</div>
+      <div style="flex:1">
+        <div style="font-size:17px;font-weight:700;color:#fff">${m.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">M${String(m.id).padStart(3,'0')} · ${m.phone}</div>
+        <div class="hero-chips" style="margin-top:8px">
+          <div class="hero-chip">${fmtM(paid*SETTINGS.contribution)} contributed</div>
+          <div class="hero-chip">${paid}/${SETTINGS.totalMonths} months</div>
+          <div class="hero-chip" style="${paidThis?'background:rgba(255,255,255,.25)':'background:rgba(239,68,68,.3);border-color:rgba(239,68,68,.5)'">${paidThis?'✓ This month paid':'⚠ Payment due'}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card green"><div class="stat-icon green"><i class="ti ti-coins"></i></div><div class="stat-label">Total Contributed</div><div class="stat-val">${fmtM(paid*SETTINGS.contribution)}</div><div class="stat-sub">${paid} of ${SETTINGS.totalMonths} months</div></div>
+    <div class="stat-card ${paidThis?'green':'red'}"><div class="stat-icon ${paidThis?'green':'red'}"><i class="ti ti-${paidThis?'circle-check':'alert-circle'}"></i></div><div class="stat-label">${MONTHS[CUR_MON-1]} Payment</div><div class="stat-val">${paidThis?'Paid':'Pending'}</div><div class="stat-sub">${fmtM(SETTINGS.contribution)} ${paidThis?'received':'due'}</div></div>
+    <div class="stat-card blue"><div class="stat-icon blue"><i class="ti ti-calendar"></i></div><div class="stat-label">Months Left</div><div class="stat-val">${SETTINGS.totalMonths-paid}</div><div class="stat-sub">of ${SETTINGS.totalMonths} total</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px">
+    <div>
+      ${loan?`<div class="card">
+        <div class="card-header"><span class="card-title"><i class="ti ti-credit-card"></i>My Active Loan</span><span class="chip active">Active</span></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+            <div style="background:var(--bg);border-radius:10px;padding:10px"><div style="font-size:9px;color:var(--mu);font-weight:700;text-transform:uppercase;margin-bottom:3px">Principal</div><div class="mono" style="font-weight:700;font-size:16px">${fmtM(loan.amount)}</div></div>
+            <div style="background:var(--accl);border-radius:10px;padding:10px"><div style="font-size:9px;color:var(--acc2);font-weight:700;text-transform:uppercase;margin-bottom:3px">Monthly EMI</div><div class="mono" style="font-weight:700;font-size:16px;color:var(--acc2)">${fmtM(calcEMI(loan.amount,loan.months))}</div></div>
+          </div>
+          <div class="info-row"><span class="lbl">Remaining Months</span><span class="val">${loan.months-loan.paid}</span></div>
+          <div class="info-row"><span class="lbl">Outstanding</span><span class="val mono" style="color:var(--dan)">${fmtM((loan.months-loan.paid)*calcEMI(loan.amount,loan.months))}</span></div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;margin-bottom:4px"><span style="color:var(--mu)">Repayment</span><span style="color:var(--p)">${Math.round((loan.paid/loan.months)*100)}%</span></div>
+            <div class="pb" style="height:8px"><div class="pf amb" style="width:${Math.round((loan.paid/loan.months)*100)}%"></div></div>
+            <div style="font-size:10px;color:var(--mu);margin-top:3px">${loan.paid}/${loan.months} EMIs paid</div>
+          </div>
+        </div>
+      </div>`:`<div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-credit-card"></i>Loan</span></div><div class="card-body" style="text-align:center;padding:28px"><div class="empty-icon" style="width:48px;height:48px;margin:0 auto 10px"><i class="ti ti-credit-card" style="font-size:22px"></i></div><div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px">No active loan</div><div style="font-size:11px;color:var(--mu);margin-bottom:14px">Request a loan from your group admin</div><button class="btn btn-primary btn-sm" onclick="goto('uloan')"><i class="ti ti-plus"></i>Request Loan</button></div></div>`}
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="ti ti-calendar"></i>Payment History</span></div>
+      <div class="card-body" style="padding:6px 12px;max-height:320px;overflow-y:auto">
+        ${MONTHS.map((mo,i)=>{
+          const mn=i+1,p=(m.paid||[]).includes(mn),future=mn>CUR_MON;
+          return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">
+            <div class="ava" style="width:26px;height:26px;font-size:9px;background:${future?'var(--bg2)':p?'var(--pl)':'var(--danl)'};color:${future?'var(--hi)':p?'var(--p)':'var(--dan)'}"><i class="ti ti-${future?'clock':p?'check':'x'}" style="font-size:11px"></i></div>
+            <div style="flex:1"><div style="font-size:12px;font-weight:600">${mo} ${CUR_YR}</div></div>
+            <div style="font-size:12px;font-weight:700;color:${future?'var(--hi)':p?'var(--p)':'var(--dan)'}" class="mono">${future?'—':p?fmtM(SETTINGS.contribution):'Pending'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function rUserPayments(){
+  const m=getMem(memId);if(!m)return'';
+  const allPaid=MONTHS.every((_,i)=>i+1>CUR_MON||(m.paid||[]).includes(i+1));
+  return`
+  ${allPaid?'<div class="alert alert-s"><i class="ti ti-check"></i>All payments up to date! Great job.</div>':'<div class="alert alert-w"><i class="ti ti-alert-triangle"></i>You have pending payments. Please contact your admin.</div>'}
+  <div class="card"><div class="card-body" style="padding:0"><table>
+    <colgroup><col style="width:25%"><col style="width:22%"><col style="width:20%"><col style="width:18%"><col style="width:15%"></colgroup>
+    <thead><tr><th>Month</th><th>Amount</th><th>Due Date</th><th>Paid On</th><th>Status</th></tr></thead>
+    <tbody>${MONTHS.map((mo,i)=>{
+      const mn=i+1,p=(m.paid||[]).includes(mn),future=mn>CUR_MON;
+      return`<tr style="${future?'color:var(--hi)':mn===CUR_MON?'background:#f8fbf9':''}"><td style="font-weight:${mn===CUR_MON?700:400}">${mo} ${CUR_YR}${mn===CUR_MON?' ●':''}</td>
+      <td class="mono">${fmtM(SETTINGS.contribution)}</td>
+      <td style="color:var(--mu)">1 ${mo}</td>
+      <td class="mono" style="color:var(--mu)">${future?'—':p?mn+'/'+CUR_YR:'-'}</td>
+      <td>${future?'<span class="chip closed">Upcoming</span>':p?'<span class="chip paid">Paid</span>':'<span class="chip overdue">Pending</span>'}</td></tr>`;
+    }).join('')}</tbody>
+  </table></div></div>`;
+}
+
+function rUserLoan(){
+  const m=getMem(memId);if(!m)return'';
+  const loan=LOANS.find(l=>l.memberId===m.id);
+  if(!loan)return`<div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-credit-card"></i>Apply for a Loan</span></div><div class="card-body">
+    <div class="alert alert-b"><i class="ti ti-info-circle"></i>Loans are available at ${SETTINGS.interestRate}% monthly interest. Contact admin to approve.</div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="fg"><label>Loan Amount (₹)</label><input type="number" id="lAmt" placeholder="e.g. 5000" oninput="calcLP()"></div>
+      <div class="fg"><label>Repayment Period</label><select id="lMo" onchange="calcLP()"><option value="3">3 months</option><option value="6">6 months</option><option value="9">9 months</option><option value="12">12 months</option></select></div>
+    </div>
+    <div id="lPrev" style="background:var(--bg);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--mu)">Enter an amount above to see your EMI breakdown</div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="alert('Loan request submitted! Your admin will review and approve.')"><i class="ti ti-send"></i>Submit Loan Request</button>
+  </div></div>`;
+  const emi=calcEMI(loan.amount,loan.months),pct=Math.round((loan.paid/loan.months)*100);
+  return`
+  <div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-credit-card"></i>Loan Details</span><span class="chip ${loan.status}">${loan.status}</span></div><div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      <div style="background:var(--bg);border-radius:10px;padding:12px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--mu);margin-bottom:4px;letter-spacing:.5px">Principal</div><div class="mono" style="font-size:18px;font-weight:700">${fmtM(loan.amount)}</div></div>
+      <div style="background:var(--accl);border-radius:10px;padding:12px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--acc2);margin-bottom:4px;letter-spacing:.5px">Monthly EMI</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--acc2)">${fmtM(emi)}</div></div>
+      <div style="background:var(--danl);border-radius:10px;padding:12px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--dan);margin-bottom:4px;letter-spacing:.5px">Outstanding</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--dan)">${fmtM((loan.months-loan.paid)*emi)}</div></div>
+    </div>
+    <div class="info-row"><span class="lbl">Issue Date</span><span class="val">${loan.date}</span></div>
+    <div class="info-row"><span class="lbl">Total Months</span><span class="val">${loan.months}</span></div>
+    <div class="info-row"><span class="lbl">Total Interest</span><span class="val mono" style="color:var(--acc)">${fmtM(calcTotalInt(loan.amount,loan.months))}</span></div>
+    <div class="info-row"><span class="lbl">Total Payable</span><span class="val mono" style="font-weight:700">${fmtM(loan.amount+calcTotalInt(loan.amount,loan.months))}</span></div>
+    ${loan.status==='active'?`<div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:11px;margin-bottom:5px"><span style="color:var(--mu)">Repayment Progress</span><span style="color:var(--p)">${pct}% (${loan.paid}/${loan.months} EMIs)</span></div><div class="pb" style="height:10px"><div class="pf amb" style="width:${pct}%"></div></div></div>`:''}
+  </div></div>
+  ${loan.status==='active'?`<div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-list"></i>EMI Schedule</span></div><div class="card-body" style="padding:0"><table>
+    <colgroup><col style="width:14%"><col style="width:24%"><col style="width:20%"><col style="width:20%"><col style="width:22%"></colgroup>
+    <thead><tr><th>EMI</th><th>Due Date</th><th>Amount</th><th>Interest</th><th>Status</th></tr></thead>
+    <tbody>${Array.from({length:loan.months},(_,i)=>{
+      const int=+(loan.amount*(1-i/loan.months)*(SETTINGS.interestRate/100)).toFixed(2);
+      const p=i<loan.paid,isCurrent=i===loan.paid;
+      return`<tr style="${isCurrent?'background:#fffbeb':''}"><td style="font-weight:600">EMI ${i+1}</td><td style="color:var(--mu)">${MONTHS[(i+loan.months+1)%12]} ${CUR_YR}</td><td class="mono">${fmtM(emi)}</td><td class="mono" style="color:var(--acc)">${fmtM(int)}</td><td>${p?'<span class="chip paid">Paid</span>':isCurrent?'<span class="chip pending">Due Now</span>':'<span class="chip closed">—</span>'}</td></tr>`;
+    }).join('')}</tbody>
+  </table></div></div>`:''}`;
+}
+
+function rUserStatement(){
+  const m=getMem(memId);if(!m)return'';
+  const loan=LOANS.find(l=>l.memberId===m.id&&l.approved);
+  const txns=[];
+  (m.paid||[]).sort((a,b)=>a-b).forEach(mn=>txns.push({date:`${String(mn).padStart(2,'0')}/${CUR_YR}`,desc:`${MONTHS[mn-1]} contribution`,credit:SETTINGS.contribution,debit:0}));
+  if(loan){txns.push({date:loan.date,desc:'Loan disbursed',credit:loan.amount,debit:0});Array.from({length:loan.paid},(_,i)=>txns.push({date:`EMI ${i+1}`,desc:'Loan EMI repayment',credit:0,debit:Math.round(calcEMI(loan.amount,loan.months))}));}
+  return`
+  <div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-file-text"></i>Account Statement</span></div><div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+      <div><div class="info-row"><span class="lbl">Member Name</span><span class="val">${m.name}</span></div><div class="info-row"><span class="lbl">Member ID</span><span class="val">M${String(m.id).padStart(3,'0')}</span></div><div class="info-row"><span class="lbl">Phone</span><span class="val">${m.phone}</span></div></div>
+      <div><div class="info-row"><span class="lbl">Total Paid</span><span class="val mono" style="color:var(--p)">${fmtM((m.paid||[]).length*SETTINGS.contribution)}</span></div>${loan?`<div class="info-row"><span class="lbl">Loan Availed</span><span class="val mono">${fmtM(loan.amount)}</span></div>`:''}${loan?`<div class="info-row"><span class="lbl">Interest Charged</span><span class="val mono" style="color:var(--acc)">${fmtM(calcTotalInt(loan.amount,loan.months))}</span></div>`:''}</div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-receipt"></i>Transaction History</span></div><div class="card-body" style="padding:0"><table>
+    <colgroup><col style="width:20%"><col style="width:42%"><col style="width:19%"><col style="width:19%"></colgroup>
+    <thead><tr><th>Date</th><th>Description</th><th>Credit</th><th>Debit</th></tr></thead>
+    <tbody>${!txns.length?`<tr><td colspan="4" style="text-align:center;color:var(--mu);padding:24px">No transactions yet</td></tr>`:txns.map(t=>`<tr><td style="color:var(--mu)">${t.date}</td><td>${t.desc}</td><td class="mono" style="color:${t.credit?'var(--p)':'var(--hi)'};font-weight:${t.credit?700:400}">${t.credit?fmtM(t.credit):'—'}</td><td class="mono" style="color:${t.debit?'var(--dan)':'var(--hi)'};font-weight:${t.debit?700:400}">${t.debit?fmtM(t.debit):'—'}</td></tr>`).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+function rUserProfile(){
+  const m=getMem(memId);if(!m)return'';
+  return`
+  <div class="card"><div class="card-header"><span class="card-title"><i class="ti ti-user"></i>My Profile</span><button class="btn btn-outline btn-sm" onclick="showChangePass()"><i class="ti ti-lock"></i>Change Password</button></div><div class="card-body">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:14px;background:var(--bg);border-radius:12px">
+      <div class="ava" style="width:56px;height:56px;font-size:20px;background:${m.bg};color:${m.color}">${ini(m.name)}</div>
+      <div><div style="font-size:17px;font-weight:700">${m.name}</div><div style="font-size:12px;color:var(--mu)">M${String(m.id).padStart(3,'0')} · Member since ${MONTHS[SETTINGS.startMonth-1]} ${SETTINGS.startYear}</div><span class="chip active" style="margin-top:5px;display:inline-flex">Active Member</span></div>
+    </div>
+    <div class="info-row"><span class="lbl">Phone Number</span><span class="val">${m.phone}</span></div>
+    <div class="info-row"><span class="lbl">Total Contributed</span><span class="val mono" style="color:var(--p)">${fmtM((m.paid||[]).length*SETTINGS.contribution)}</span></div>
+    <div class="info-row"><span class="lbl">Months Paid</span><span class="val">${(m.paid||[]).length}/${SETTINGS.totalMonths}</span></div>
+    <div class="info-row"><span class="lbl">Monthly Contribution</span><span class="val mono">${fmtM(SETTINGS.contribution)}</span></div>
+    <div class="info-row"><span class="lbl">Group</span><span class="val">${SETTINGS.groupName}</span></div>
+  </div></div>`;
+}
+
+// ─── HELPERS ───
+function calcLP(){
+  const amt=parseFloat(document.getElementById('lAmt')?.value||0);
+  const mo=parseInt(document.getElementById('lMo')?.value||3);
+  const el=document.getElementById('lPrev');if(!el)return;
+  if(!amt||amt<100){el.innerHTML='<div style="font-size:12px;color:var(--mu)">Enter an amount above to see your EMI breakdown</div>';return;}
+  const emi=calcEMI(amt,mo),int=calcTotalInt(amt,mo);
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+    <div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Monthly EMI</div><div class="mono" style="font-size:15px;font-weight:700;color:var(--p)">${fmtM(emi)}</div></div>
+    <div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Total Interest</div><div class="mono" style="font-size:15px;font-weight:700;color:var(--acc)">${fmtM(int)}</div></div>
+    <div><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Total Payable</div><div class="mono" style="font-size:15px;font-weight:700">${fmtM(amt+int)}</div></div>
+  </div>`;
+}
+
+function openModal(html){document.getElementById('modalBody').innerHTML=html;document.getElementById('modalOverlay').className='modal-overlay open';}
+function closeModal(){document.getElementById('modalOverlay').className='modal-overlay';}
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function showAddMember(){
+  openModal(`<h3><i class="ti ti-user-plus"></i>Add New Member</h3>
+    <div class="fg"><label>Full Name</label><input id="nm_n" placeholder="Member's full name"></div>
+    <div class="fg"><label>Phone Number</label><input id="nm_p" placeholder="10-digit phone (used for login)"></div>
+    <div class="fg"><label>Login Password</label><input type="password" id="nm_pw" placeholder="Set login password" value="pass123"></div>
+    <div id="nm_e"></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary" style="flex:1" onclick="doAddMember()"><i class="ti ti-check"></i>Add Member</button><button class="btn btn-outline" onclick="closeModal()">Cancel</button></div>`);
+}
+function doAddMember(){
+  const n=document.getElementById('nm_n').value.trim();
+  const p=document.getElementById('nm_p').value.trim();
+  const pw=document.getElementById('nm_pw').value.trim();
+  const e=document.getElementById('nm_e');
+  if(!n||!p||!pw){e.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Fill all fields</div>';return;}
+  if(MEMBERS.find(m=>m.phone===p)){e.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Phone already registered</div>';return;}
+  const nid=MEMBERS.length?Math.max(...MEMBERS.map(m=>m.id))+1:1;
+  const cl=getColor(nid-1);
+  MEMBERS.push({id:nid,name:n,phone:p,pass:pw,paid:[],color:cl.c,bg:cl.bg});
+  logActivity('ti-user-plus',`New member added: ${n}`,'member');
+  sv();closeModal();goto('members');
+}
+
+function showEditMember(id){
+  const m=getMem(id);
+  openModal(`<h3><i class="ti ti-edit"></i>Edit Member</h3>
+    <div class="fg"><label>Full Name</label><input id="em_n" value="${m.name}"></div>
+    <div class="fg"><label>Phone Number</label><input id="em_p" value="${m.phone}"></div>
+    <div class="fg"><label>New Password</label><input type="password" id="em_pw" placeholder="Leave blank to keep current"></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary" style="flex:1" onclick="doEditMember(${id})"><i class="ti ti-check"></i>Save</button><button class="btn btn-outline" onclick="closeModal()">Cancel</button></div>`);
+}
+function doEditMember(id){
+  const m=getMem(id);
+  m.name=document.getElementById('em_n').value.trim()||m.name;
+  m.phone=document.getElementById('em_p').value.trim()||m.phone;
+  const np=document.getElementById('em_pw').value.trim();
+  if(np)m.pass=np;
+  sv();closeModal();goto('members');
+}
+function deleteMember(id){
+  if(!confirm('Remove this member? All their data will be deleted.'))return;
+  const i=MEMBERS.findIndex(m=>m.id===id);if(i>=0)MEMBERS.splice(i,1);
+  sv();closeModal();goto('members');
+}
+
+function quickCollect(mid,mn){
+  const m=getMem(mid);if(!m)return;
+  if(!m.paid)m.paid=[];
+  if(!m.paid.includes(mn)){m.paid.push(mn);m.paid.sort((a,b)=>a-b);}
+  logActivity('ti-coins',`${m.name} paid ${MONTHS[mn-1]} — ${fmtM(SETTINGS.contribution)}`,'payment');
+  sv();updateNotifDot();buildNav();goto(page);
+}
+
+function showNewLoan(){
+  openModal(`<h3><i class="ti ti-credit-card"></i>Issue New Loan</h3>
+    <div class="fg"><label>Member</label><select id="nl_m">${MEMBERS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')||'<option>No members</option>'}</select></div>
+    <div class="form-row">
+      <div class="fg"><label>Amount (₹)</label><input type="number" id="nl_a" placeholder="e.g. 5000"></div>
+      <div class="fg"><label>Months</label><select id="nl_mo"><option value="3">3 months</option><option value="6">6 months</option><option value="9">9 months</option><option value="12">12 months</option></select></div>
+    </div>
+    <div class="fg"><label>Issue Date</label><input type="date" id="nl_d" value="${TODAY.toISOString().split('T')[0]}"></div>
+    <div class="fg"><label>Purpose</label><input id="nl_p" placeholder="Reason for loan (optional)"></div>
+    <div id="nl_prev" style="background:var(--bg);border-radius:9px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--mu)"></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-primary" style="flex:1" onclick="issueLoan()"><i class="ti ti-check"></i>Issue Loan</button><button class="btn btn-outline" onclick="closeModal()">Cancel</button></div>`,
+  );
+  document.getElementById('nl_a').addEventListener('input',previewLoan);
+  document.getElementById('nl_mo').addEventListener('change',previewLoan);
+}
+function previewLoan(){
+  const a=parseFloat(document.getElementById('nl_a')?.value||0);
+  const mo=parseInt(document.getElementById('nl_mo')?.value||3);
+  const el=document.getElementById('nl_prev');if(!el||!a)return;
+  el.innerHTML=`EMI: <b>${fmtM(calcEMI(a,mo))}</b>/month · Total Payable: <b>${fmtM(a+calcTotalInt(a,mo))}</b> · Interest: <b>${fmtM(calcTotalInt(a,mo))}</b>`;
+}
+function issueLoan(){
+  const mid=parseInt(document.getElementById('nl_m').value);
+  const amt=parseFloat(document.getElementById('nl_a').value);
+  const mo=parseInt(document.getElementById('nl_mo').value);
+  const d=document.getElementById('nl_d').value;
+  if(!amt||amt<100){alert('Enter a valid amount');return;}
+  const nid=LOANS.length?Math.max(...LOANS.map(l=>l.id))+1:1;
+  const m=getMem(mid);
+  LOANS.push({id:nid,memberId:mid,amount:amt,approved:true,date:d,months:mo,paid:0,status:'active'});
+  logActivity('ti-credit-card',`Loan issued: ${m?.name} — ${fmtM(amt)} for ${mo} months`,'loan');
+  sv();closeModal();goto('loans');
+}
+function approveLoan(id){const l=LOANS.find(x=>x.id===id);if(l){l.approved=true;l.status='active';logActivity('ti-check',`Loan approved: ${getMem(l.memberId)?.name||'unknown'}`,'loan');sv();}goto(page);}
+function rejectLoan(id){const l=LOANS.find(x=>x.id===id);if(l){l.status='rejected';sv();}goto(page);}
+function recordEMI(id){const l=LOANS.find(x=>x.id===id);if(l&&l.paid<l.months){l.paid++;sv();goto(page);}}
+function showLoanDetails(id){
+  const l=LOANS.find(x=>x.id===id);const m=getMem(l.memberId);if(!l||!m)return;
+  const emi=calcEMI(l.amount,l.months);
+  openModal(`<h3><i class="ti ti-list"></i>EMI Schedule — ${m.name}</h3>
+    <table style="font-size:11px"><thead><tr><th>EMI</th><th>Amount</th><th>Interest</th><th>Status</th></tr></thead><tbody>
+    ${Array.from({length:l.months},(_,i)=>{
+      const int=+(l.amount*(1-i/l.months)*(SETTINGS.interestRate/100)).toFixed(2);
+      const p=i<l.paid;
+      return`<tr><td>EMI ${i+1}</td><td class="mono">${fmtM(emi)}</td><td class="mono" style="color:var(--acc)">${fmtM(int)}</td><td>${p?'<span class="chip paid">Paid</span>':i===l.paid?'<span class="chip pending">Due</span>':'<span class="chip closed">—</span>'}</td></tr>`;
+    }).join('')}</tbody></table>
+    <button class="btn btn-outline" style="margin-top:12px;width:100%" onclick="closeModal()">Close</button>`);
+}
+
+function showNotifications(){
+  const pending=LOANS.filter(l=>l.status==='pending');
+  const unpaid=MEMBERS.filter(m=>!(m.paid||[]).includes(CUR_MON));
+  openModal(`<h3><i class="ti ti-bell"></i>Notifications</h3>
+    ${pending.length?`<div class="alert alert-w" style="margin-bottom:8px"><i class="ti ti-credit-card"></i>${pending.length} loan request(s) pending approval</div>`:''}
+    ${unpaid.length?`<div class="alert alert-d" style="margin-bottom:8px"><i class="ti ti-alert-triangle"></i>${unpaid.length} member(s) have not paid for ${MONTHS[CUR_MON-1]}</div>`:''}
+    ${!pending.length&&!unpaid.length?'<div class="alert alert-s"><i class="ti ti-check"></i>All caught up! No pending actions.</div>':''}
+    <button class="btn btn-outline" style="margin-top:8px;width:100%" onclick="closeModal()">Close</button>`);
+}
+
+function showChangePass(){
+  openModal(`<h3><i class="ti ti-lock"></i>Change Password</h3>
+    <div class="fg"><label>Current Password</label><input type="password" id="cp_o"></div>
+    <div class="fg"><label>New Password</label><input type="password" id="cp_n"></div>
+    <div class="fg"><label>Confirm Password</label><input type="password" id="cp_c"></div>
+    <div id="cp_e"></div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1" onclick="doChangePass()">Update</button><button class="btn btn-outline" onclick="closeModal()">Cancel</button></div>`);
+}
+function doChangePass(){
+  const m=getMem(memId);
+  const o=document.getElementById('cp_o').value,n=document.getElementById('cp_n').value,c=document.getElementById('cp_c').value;
+  const e=document.getElementById('cp_e');
+  if(o!==m.pass){e.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Wrong current password</div>';return;}
+  if(n!==c){e.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Passwords do not match</div>';return;}
+  if(n.length<4){e.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Min 4 characters</div>';return;}
+  m.pass=n;sv();closeModal();alert('Password updated!');
+}
+
+function saveSettings(){
+  SETTINGS.groupName=document.getElementById('s_name').value.trim()||'SavingsCircle';
+  SETTINGS.contribution=parseInt(document.getElementById('s_contrib').value)||500;
+  SETTINGS.interestRate=parseFloat(document.getElementById('s_rate').value)||0.5;
+  SETTINGS.totalMonths=parseInt(document.getElementById('s_months').value)||12;
+  SETTINGS.startYear=parseInt(document.getElementById('s_yr').value)||CUR_YR;
+  SETTINGS.startMonth=parseInt(document.getElementById('s_smon').value)||1;
+  sv();document.getElementById('settings_msg').innerHTML='<div class="alert alert-s"><i class="ti ti-check"></i>Settings saved successfully</div>';
+}
+function changeAdminPass(){
+  const o=document.getElementById('ap_old').value,n=document.getElementById('ap_new').value,c=document.getElementById('ap_conf').value;
+  const msg=document.getElementById('ap_msg');
+  if(o!==ADMIN.p){msg.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Wrong current password</div>';return;}
+  if(n!==c){msg.innerHTML='<div class="alert alert-d"><i class="ti ti-x"></i>Passwords do not match</div>';return;}
+  ADMIN.p=n;msg.innerHTML='<div class="alert alert-s"><i class="ti ti-check"></i>Admin password updated</div>';
+}
+function clearPayments(){if(!confirm('Clear all payment records?'))return;MEMBERS.forEach(m=>m.paid=[]);sv();goto('settings');}
+function clearLoans(){if(!confirm('Delete all loan records?'))return;LOANS.length=0;sv();goto('settings');}
+function resetApp(){if(!confirm('Reset EVERYTHING? All members, loans and data will be deleted permanently.'))return;MEMBERS.length=0;LOANS.length=0;ACTIVITY.length=0;SETTINGS={groupName:'SavingsCircle',contribution:500,totalMonths:12,startMonth:1,startYear:CUR_YR,interestRate:0.5};sv();doLogout();}
+</script>
+</body>
+</html>
